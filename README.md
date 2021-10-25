@@ -21,7 +21,7 @@ Project ENDPOINTS
 - http://127.0.0.1:8000/like/1
 
 
-Available TEST
+
 The following test passed when ran:
 - test for sign up 
 - test for sign in 
