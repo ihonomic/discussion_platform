@@ -7,11 +7,11 @@ class Post(models.Model):
         Model that handle user post
     '''
     title = models.CharField(
-        max_length=256, verbose_name='Title of Post',  null=True, )
+        max_length=256, verbose_name='Title of Post', default='0')
     post_content = models.CharField(
-        max_length=1000, verbose_name='Post Content',   null=True,)
+        max_length=1000, verbose_name='Post Content', default='0')
     posted_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='owner',  null=True)
+        User, on_delete=models.CASCADE, related_name='owner', default='0')
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True)
 

@@ -43,7 +43,7 @@ class SignInView(GenericAPIView):
         if not user:
             return Response({"error": "Invalid username or password"}, status="400")
         login(self.request, user)
-        return Response(serializer.data, status=201)
+        return Response(serializer.data, status=200)
 
 
 class LogoutView(APIView):
