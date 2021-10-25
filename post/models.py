@@ -11,7 +11,7 @@ class Post(models.Model):
     post_content = models.CharField(
         max_length=1000, verbose_name='Post Content', default='0')
     posted_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='owner', default='0')
+        User, on_delete=models.CASCADE, related_name='owner', default=0)
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True)
 
