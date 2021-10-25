@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('', views.PostView.as_view(), name='post'),
-    path('like/<int:pk>', views.LikeAPostView.as_view(), name='post_like'),
+    path('<int:pk>', views.PostDetailView.as_view(), name='post'),
+    path('like/<int:pk>', views.TooglePostLikeView.as_view(), name='post_like'),
 ]

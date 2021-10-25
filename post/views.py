@@ -1,56 +1,49 @@
-from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-from post.serializers import PostSerializer
+from post.serializers import PostLikeSerializer, PostSerializer
 from .models import Post, PostLike
 from rest_framework import permissions
-from django.http.response import Http404
+from django.db.models import Q
+from .permissions import IsOwnerOrReadOnly
 
 
-class IsOwner(permissions.BasePermission):
-
-    def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return True
-        return False
-
-    def has_object_permission(self, request, view, obj):
-        if obj.author == request.user:
-            return True
-        return False
-
-
-class PostView(APIView):
+class PostView(ListCreateAPIView):
     serializer_class = PostSerializer
-    permission_classes = (permissions.IsAuthenticated, IsOwner, )
+    queryset = Post.objects.all()
 
-    def get_object(self, pk):
-        try:
-            return Post.objects.get(pk=pk)
-        except Post.DoesNotExist:
-            raise Http404
-
-    def get(self, request, format=None):
-        queryset = Post.objects.all()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data, status='200')
-
-    def post(self, request, format=None):
-        Post.objects.create(
+    def post(self, request, *args, **kwargs):
+        post = Post.objects.create(
             title=request.data['title'],
             post_content=request.data['post_content'],
-            user_id=request.user.id
+            posted_by_id=request.user.id
         )
+        post = self.serializer_class(post).data
 
-        return Response({'success': 'New Post added'}, status='201')
-
-    def put(self, request, format=None):
-        #   Update other details
-        serializer = self.serializer_class(
-            user_obj, data=data)
-        if serializer.is_valid():
-            serializer.save()
+        return Response(post, status='201')
 
 
-class LikeAPostView(APIView):
-    ...
+class PostDetailView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
+
+class TooglePostLikeView(ListCreateAPIView):
+    queryset = PostLike.objects.all()
+    serializer_class = PostLikeSerializer
+
+    def post(self, request, pk, *args, **kwargs):
+        check_if_liked = PostLike.objects.filter(
+            Q(post_id=pk) &
+            Q(posted_by_id=request.user.id))
+        if check_if_liked:
+            check_if_liked.delete()
+            return Response({'success': 'You unliked a post'}, status='200')
+        else:
+            PostLike.objects.create(
+                post_id=pk,
+                posted_by_id=request.user.id
+            )
+            return Response({'success': 'You like a post'}, status='200')
